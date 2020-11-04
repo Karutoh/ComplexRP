@@ -70,6 +70,14 @@ function SWEP:OnDrop()
     end
 end
 
+function SWEP:Reload()
+    local tool = TOOLS.list[player_manager.RunClass(self.Owner, "GetCurrentTool")]
+
+    if tool.Reload != nil then
+        tool:Reload()
+    end
+end
+
 function SWEP:PrimaryAttack()
     local tool = TOOLS.list[player_manager.RunClass(self.Owner, "GetCurrentTool")]
 

@@ -15,6 +15,7 @@ include("menu/server.lua")
 
 function GM:PlayerSpawn(ply, transition)
     player_manager.SetPlayerClass(ply, "player_custom")
+    ply:SetModel("models/player/alyx.mdl")
     ply:SetupHands()
 end
 
