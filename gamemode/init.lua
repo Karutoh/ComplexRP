@@ -15,6 +15,7 @@ include("menu/server.lua")
 
 function GM:PlayerSpawn(ply, transition)
     player_manager.SetPlayerClass(ply, "player_custom")
+    ply:SetupHands()
 end
 
 net.Receive("GiveTool", function (len, ply)

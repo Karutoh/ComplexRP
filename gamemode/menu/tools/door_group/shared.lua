@@ -387,6 +387,9 @@ end
 function TOOL:OnDrop()
 end
 
+function TOOL:Reload()
+end
+
 function TOOL:PrimaryAttack(ply)
     local ent = ply:GetEyeTrace().Entity
     if !IsValid(ent) then
