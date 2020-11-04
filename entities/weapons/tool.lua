@@ -1,4 +1,4 @@
-SWEP.Catergory = "Other"
+SWEP.Category = "Other"
 SWEP.Spawnable = false
 SWEP.AdminOnly = false
 SWEP.PrintName = "Tool"
@@ -60,6 +60,8 @@ function SWEP:Holster(weapon)
     if tool.Holster != nil then
         tool:Holster(weapon)
     end
+
+    return true
 end
 
 function SWEP:OnDrop()

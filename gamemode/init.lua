@@ -20,5 +20,7 @@ function GM:PlayerSpawn(ply, transition)
 end
 
 net.Receive("GiveTool", function (len, ply)
-    ply:Give("tool")
+    if ply:HasWeapon("tool") then
+        ply:Give("tool")
+    end
 end)

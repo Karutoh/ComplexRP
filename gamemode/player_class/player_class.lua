@@ -1,4 +1,11 @@
+DEFINE_BASECLASS("player_default")
+
+local PLAYER = {}
+PLAYER.Rank = ""
+PLAYER.CurrentTool = 1
+
 if SERVER then
+    util.AddNetworkString("SetRank")
     util.AddNetworkString("SetCurrentTool")
 
     net.Receive("SetCurrentTool", function (len, ply)
@@ -6,16 +13,29 @@ if SERVER then
     end)
 end
 
-DEFINE_BASECLASS("player_default")
+function PLAYER:SetRank(name)
+    if SERVER then
+        if !RANK:Exists(name) then
+            return
+        end
 
-local PLAYER = {}
-PLAYER.CurrentTool = 1
+        net.Start("SetRank")
+        net.WriteString(name)
+        net.Send(self)
+    end
+    
+    self.Rank = name
+end
 
-function PLAYER:GetCurrentTool()
-    return self.CurrentTool
+function PLAYER:GetRank()
+    return self.Rank
 end
 
 if CLIENT then
+    net.Receive("SetRank", function (len, ply)
+        ply.
+    end)
+
     function PLAYER:SetCurrentTool(index)
         if SERVER then
             return
@@ -27,6 +47,10 @@ if CLIENT then
         net.WriteInt(index, 32)
         net.SendToServer()
     end
+end
+
+function PLAYER:GetCurrentTool()
+    return self.CurrentTool
 end
 
 player_manager.RegisterClass("player_custom", PLAYER, "player_default")

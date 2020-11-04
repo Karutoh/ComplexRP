@@ -3,6 +3,7 @@ include("shared.lua")
 
 function GM:AddMenuTabTools(frame, tabs)
     local tools = vgui.Create("DPanel", tabs)
+    tools:SetSize(tabs:GetWide(), tabs:GetTall() - 36)
 
     tabs:AddSheet("Tools", tools, "icon16/wrench.png")
 
@@ -42,12 +43,9 @@ function GM:AddMenuTabTools(frame, tabs)
 
             player_manager.RunClass(LocalPlayer(), "SetCurrentTool", p.Tool)
 
-            if LocalPlayer():HasWeapon("tool") then
-                input.SelectWeapon(LocalPlayer():GetWeapon("tool"))
-            else
-                net.Start("GiveTool")
-                net.SendToServer()
-            end
+            net.Start("GiveTool")
+            net.SendToServer()
+            input.SelectWeapon(LocalPlayer():GetWeapon("tool"))
 
             local properties = p:GetParent():GetParent():GetParent():GetParent():GetChildren()[2]
             properties:Clear()

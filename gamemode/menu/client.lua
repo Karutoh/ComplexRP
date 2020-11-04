@@ -8,11 +8,15 @@ include("ranks/shared.lua")
 
 function GM:AddMenuTabProfile(frame, tabs)
     local profile = vgui.Create("DPanel", tabs)
+    profile:SetSize(tabs:GetWide(), tabs:GetTall() - 36)
+
     tabs:AddSheet("Profile", profile, "icon16/user.png")
 end
 
 function GM:AddMenuTabProps(frame, tabs)
     local props = vgui.Create("DPanel", tabs)
+    props:SetSize(tabs:GetWide(), tabs:GetTall() - 36)
+
     tabs:AddSheet("Props", props, "icon16/brick_add.png")
 end
 
@@ -29,6 +33,7 @@ concommand.Add("crp_show_menu", function (ply, cmd, args, argStr)
 
     local tabs = vgui.Create("DPropertySheet", frame)
     tabs:Dock(FILL)
+    tabs:InvalidateParent(true)
 
     hook.Run("AddMenuTabProfile", frame, tabs)
     hook.Run("AddMenuTabTools", frame, tabs)
