@@ -1,0 +1,7 @@
+"hardlinerp"
+{
+	"base"		"sandbox"
+	"title"		"Complex RP"
+	"maps"		"^rp_"
+	"menusystem"	"1"
+}
