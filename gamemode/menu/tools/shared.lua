@@ -1,27 +1,26 @@
-TOOLS = {}
+tool = {}
 
-TOOLS.list = {}
+local tools = {}
 
-function TOOLS:Create(name)
+tool.Create = function (name)
     return {
-        Name = name,
-        PrintName = "",
-        Category = "",
-        AdminOnly = false,
-        Primary = {
-            Sound = Sound("Airboat.FireGunRevDown"),
-            Delay = 1
+        name = name,
+        category = "",
+        adminOnly = false,
+        primary = {
+            sound = Sound("Airboat.FireGunRevDown"),
+            delay = 1
         },
-        Secondary = {
-            Sound = Sound("Airboat.FireGunRevDown"),
-            Delay = 1
+        secondary = {
+            sound = Sound("Airboat.FireGunRevDown"),
+            delay = 1
         }
     }
 end
 
-function TOOLS:Exists(name)
-    for i = 1, #self.list, 1 do
-        if string.lower(self.list[i].Name) == string.lower(name) then
+tool.Exists = function (name)
+    for i = 1, #tools, 1 do
+        if string.lower(tools[i].name) == string.lower(name) then
             return true
         end
     end
@@ -29,22 +28,34 @@ function TOOLS:Exists(name)
     return false
 end
 
-function TOOLS:Get(name)
-    for i = 1, #self.list, 1 do
-        if string.lower(self.list[i].Name) == string.lower(tool.Name) then
-            return self.list[i]
+tool.GetAll = function ()
+    return table.Copy(tools)
+end
+
+tool.GetByIndex = function (index)
+    if index < 0 && index > #tools then
+        return nil
+    end
+
+    return table.Copy(tools[index])
+end
+
+tool.Get = function (name)
+    for i = 1, #tools, 1 do
+        if string.lower(tools[i].name) == string.lower(tool.name) then
+            return table.Copy(tools[i]), i
         end
     end
 
-    return nil
+    return nil, 0
 end
 
-function TOOLS:Add(tool)
-    if self:Exists(tool.Name) then
+tool.Add = function (newTool)
+    if tool.Exists(newTool.name) then
         return false
     end
 
-    table.insert(self.list, tool)
+    table.insert(tools, newTool)
 end
 
 AddCSLuaFile("door_group/shared.lua")

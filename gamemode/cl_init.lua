@@ -1,11 +1,18 @@
---Player Class
-include("player_class/player_class.lua")
+--Player Info
+include("player_class/player_crp.lua")
 
 --Root
 include("shared.lua")
 
 --Menu
 include("menu/client.lua")
+
+hook.Add("PlayerClassChanged", "ClientLoadedPlayerClass", function (ply, newId)
+    net.Start("ClientLoadedPlayerClass")
+    net.WriteString(ply:SteamID64())
+    net.WriteInt(newId, 32)
+    net.SendToServer()
+end)
 
 function GM:PostDrawViewModel(vm, ply, weapon)
 	if weapon.UseHands || !weapon:IsScripted() then

@@ -3,17 +3,16 @@ if SERVER then
     util.AddNetworkString("AddDoor")
 end
 
-local TOOL = TOOLS:Create("door_grouper")
-TOOL.PrintName = "Door Grouper"
-TOOL.Category = "Map"
-TOOL.AdminOnly = false
+local TOOL = tool.Create("Door Grouper")
+TOOL.category = "Map"
+TOOL.adminOnly = false
 
-TOOL.Primary.Delay = 0.5
+TOOL.primary.delay = 0.5
 
-TOOL.Secondary.Delay = 0.5
+TOOL.secondary.delay = 0.5
 
-TOOL.Groups = {}
-TOOL.Selected = {}
+TOOL.groups = {}
+TOOL.selected = {}
 
 if CLIENT then
     function TOOL:TextEntryBox(frame, tmpText, task)
@@ -72,12 +71,12 @@ if CLIENT then
         groups:SetSize(panel:GetWide() / 2, panel:GetTall())
         groups:SetPos(0, 0)
         groups.Populate = function ()
-            for i = 1, #self.Groups, 1 do
-                local ply = player.GetBySteamID64(self.Groups[i].Owner)
+            for i = 1, #self.groups, 1 do
+                local ply = player.GetBySteamID64(self.groups[i].Owner)
                 if IsValid(ply) then
-                    groups:AddLine(self.Groups[i].Name, ply:GetName(), self.Groups[i].Owner)
+                    groups:AddLine(self.groups[i].name, ply:GetName(), self.groups[i].owner)
                 else
-                    groups:AddLine(self.Groups[i].Name, "", self.Groups[i].Owner)
+                    groups:AddLine(self.groups[i].name, "", self.groups[i].owner)
                 end
             end
         end
@@ -108,21 +107,21 @@ if CLIENT then
 
                 if #sGroups == #groups:GetLines() then
                     groups:Clear()
-                    table.Empty(self.Groups)
+                    table.Empty(self.groups)
                 else
                     local newGroups = {}
-                    for d = 1, #self.Groups, 1 do
+                    for d = 1, #self.groups, 1 do
                         local found = false
 
                         for i = 1, #sGroups, 1 do
-                            if self.Groups[d].Name == sGroups[i]:GetColumnText(1) then
+                            if self.groups[d].Name == sGroups[i]:GetColumnText(1) then
                                 found = true
                                 break
                             end
                         end
 
                         if !found then
-                            table.insert(newGroups, self.Groups[d])
+                            table.insert(newGroups, self.groups[d])
                         end
                     end
 
@@ -135,7 +134,7 @@ if CLIENT then
                         end
                     end
 
-                    self.Groups = newGroups
+                    self.groups = newGroups
                 end
             end)
             selectedMenu:Open()
@@ -153,8 +152,8 @@ if CLIENT then
                 return
             end
 
-            for i = 1, #self.Groups[groups:GetSelectedLine()].Doors, 1 do
-                doors:AddLine(self.Groups[groups:GetSelectedLine()].Doors[i].Name, self.Groups[groups:GetSelectedLine()].Doors[i].Id)
+            for i = 1, #self.groups[groups:GetSelectedLine()].Doors, 1 do
+                doors:AddLine(self.groups[groups:GetSelectedLine()].Doors[i].Name, self.groups[groups:GetSelectedLine()].Doors[i].Id)
             end
         end
         doors.OnRowSelected = function (line, lineId)
@@ -167,17 +166,17 @@ if CLIENT then
             local d = panel:GetChildren()[3]
             d:Clear()
 
-            local group = self.Groups[groups:GetSelectedLine()]
-            local door = group.Doors[lineId]
-            for i = 1, #door.CoOwners, 1 do
-                d:AddLine(player.GetBySteamID64(door.CoOwners[i]):GetName(), door.CoOwners[i])
+            local group = self.groups[groups:GetSelectedLine()]
+            local door = group.doors[lineId]
+            for i = 1, #door.coOwners, 1 do
+                d:AddLine(player.GetBySteamID64(door.coOwners[i]):GetName(), door.coOwners[i])
             end
         end
         doors.OnRowRightClick = function (line, lineId)
             local selectedMenu = DermaMenu()
             selectedMenu:AddOption("Rename", function ()
                 self:TextEntryBox(frame, "Door Name", function (text)
-                    self.Groups[groups:GetSelectedLine()].Doors[lineId].Name = text
+                    self.groups[groups:GetSelectedLine()].doors[lineId].name = text
                     line:GetLine(lineId):SetColumnText(1, text)
                 end)
             end)
@@ -188,22 +187,22 @@ if CLIENT then
 
                 if #sDoors == #doors:GetLines() then
                     doors:Clear()
-                    table.remove(self.Groups, groups:GetSelectedLine())
+                    table.remove(self.groups, groups:GetSelectedLine())
                     groups:RemoveLine(groups:GetSelectedLine())
                 else
                     local newDoors = {}
-                    for d = 1, #self.Groups[groups:GetSelectedLine()].Doors, 1 do
+                    for d = 1, #self.groups[groups:GetSelectedLine()].doors, 1 do
                         local found = false
 
                         for i = 1, #sDoors, 1 do
-                            if self.Groups[groups:GetSelectedLine()].Doors[d].Id == sDoors[i]:GetColumnText(2) then
+                            if self.groups[groups:GetSelectedLine()].doors[d].Id == sDoors[i]:GetColumnText(2) then
                                 found = true
                                 break
                             end
                         end
 
                         if !found then
-                            table.insert(newDoors, self.Groups[groups:GetSelectedLine()].Doors[d])
+                            table.insert(newDoors, self.groups[groups:GetSelectedLine()].doors[d])
                         end
                     end
 
@@ -216,7 +215,7 @@ if CLIENT then
                         end
                     end
 
-                    self.Groups[groups:GetSelectedLine()].Doors = newDoors
+                    self.groups[groups:GetSelectedLine()].doors = newDoors
                 end
             end)
             selectedMenu:Open()
@@ -234,22 +233,22 @@ if CLIENT then
                 local sCoOwners = doors:GetSelected()
 
                 if #sCoOwners == #coOwners:GetLines() then
-                    table.Empty(self.Groups[groups:GetSelectedLine()].Doors[doors:GetSelectedLine()].CoOwners)
+                    table.Empty(self.groups[groups:GetSelectedLine()].doors[doors:GetSelectedLine()].coOwners)
                     coOwners:Clear()
                 else
                     local newCoOwners = {}
-                    for d = 1, #self.Groups[groups:GetSelectedLine()].Doors[doors:GetSelectedLine()].CoOwners, 1 do
+                    for d = 1, #self.groups[groups:GetSelectedLine()].doors[doors:GetSelectedLine()].coOwners, 1 do
                         local found = false
 
                         for i = 1, #sCoOwners, 1 do
-                            if self.Groups[groups:GetSelectedLine()].Doors[doors:GetSelectedLine()].CoOwners[d] == sCoOwners[i]:GetColumnText(2) then
+                            if self.groups[groups:GetSelectedLine()].doors[doors:GetSelectedLine()].coOwners[d] == sCoOwners[i]:GetColumnText(2) then
                                 found = true
                                 break
                             end
                         end
 
                         if !found then
-                            table.insert(newCoOwners, self.Groups[groups:GetSelectedLine()].Doors[doors:GetSelectedLine()].CoOwners)
+                            table.insert(newCoOwners, self.groups[groups:GetSelectedLine()].doors[doors:GetSelectedLine()].coOwners)
                         end
                     end
 
@@ -262,7 +261,7 @@ if CLIENT then
                         end
                     end
 
-                    self.Groups[groups:GetSelectedLine()].Doors[doors:GetSelectedLine()].CoOwners = newCoOwners
+                    self.groups[groups:GetSelectedLine()].doors[doors:GetSelectedLine()].coOwners = newCoOwners
                 end
             end)
             selectedMenu:Open()
@@ -281,7 +280,7 @@ if CLIENT then
             end
 
             self:TextEntryBox(frame, "Co-Owner's Steam Id 64", function (text)
-                if table.HasValue(self.Groups[groups:GetSelectedLine()].Doors[doors:GetSelectedLine()].CoOwners, text) then
+                if table.HasValue(self.groups[groups:GetSelectedLine()].doors[doors:GetSelectedLine()].coOwners, text) then
                     return
                 end
 
@@ -290,7 +289,7 @@ if CLIENT then
                     return
                 end
 
-                table.insert(self.Groups[groups:GetSelectedLine()].Doors[doors:GetSelectedLine()].CoOwners, text)
+                table.insert(self.groups[groups:GetSelectedLine()].doors[doors:GetSelectedLine()].coOwners, text)
                 coOwners:AddLine(ply:GetName(), text)
             end)
         end
@@ -307,29 +306,29 @@ if CLIENT then
             for i = 1, #self.Selected, 1 do
                 local found = false
 
-                for d = 1, #self.Groups[groups:GetSelectedLine()].Doors, 1 do
-                    if self.Groups[groups:GetSelectedLine()].Doors[d].Id == self.Selected[i] then
+                for d = 1, #self.groups[groups:GetSelectedLine()].doors, 1 do
+                    if self.groups[groups:GetSelectedLine()].doors[d].Id == self.selected[i] then
                         found = true
                         break
                     end
                 end
 
                 if !found then
-                    table.insert(self.Groups[groups:GetSelectedLine()].Doors, {
+                    table.insert(self.groups[groups:GetSelectedLine()].doors, {
                         Name = "",
-                        Id = self.Selected[i],
+                        Id = self.selected[i],
                         CoOwners = {}
                     })
                 end
             end
 
-            table.Empty(self.Selected)
+            table.Empty(self.selected)
 
             doors:Clear()
             coOwners:Clear()
 
-            for i = 1, #self.Groups[groups:GetSelectedLine()].Doors, 1 do
-                doors:AddLine(self.Groups[groups:GetSelectedLine()].Doors[i].Name, self.Groups[groups:GetSelectedLine()].Doors[i].Id)
+            for i = 1, #self.groups[groups:GetSelectedLine()].doors, 1 do
+                doors:AddLine(self.groups[groups:GetSelectedLine()].doors[i].name, self.groups[groups:GetSelectedLine()].doors[i].id)
             end
         end
 
@@ -338,7 +337,7 @@ if CLIENT then
         create:SetSize(panel:GetWide() / 4, 40)
         create:SetPos((panel:GetWide() / 4) * 3, panel:GetTall() - 40)
         create.DoClick = function (p)
-            if #self.Selected == 0 then
+            if #self.selected == 0 then
                 return
             end
 
@@ -349,28 +348,28 @@ if CLIENT then
                     Doors = {}
                 }
     
-                for i = 1, #self.Selected, 1 do
-                    table.insert(door.Doors, {
+                for i = 1, #self.selected, 1 do
+                    table.insert(door.doors, {
                         Name = "",
-                        Id = self.Selected[i],
+                        Id = self.selected[i],
                         CoOwners = {}
                     })
                 end
     
-                table.Empty(self.Selected)
+                table.Empty(self.selected)
     
-                table.insert(self.Groups, door)
+                table.insert(self.groups, door)
     
                 groups:Clear()
                 doors:Clear()
                 coOwners:Clear()
     
-                for i = 1, #self.Groups, 1 do
-                    local ply = player.GetBySteamID64(self.Groups[i].Owner)
+                for i = 1, #self.groups, 1 do
+                    local ply = player.GetBySteamID64(self.groups[i].owner)
                     if IsValid(ply) then
-                        groups:AddLine(self.Groups[i].Name, ply:GetName(), self.Groups[i].Owner)
+                        groups:AddLine(self.groups[i].name, ply:GetName(), self.groups[i].owner)
                     else
-                        groups:AddLine(self.Groups[i].Name, "", self.Groups[i].Owner)
+                        groups:AddLine(self.groups[i].name, "", self.groups[i].owner)
                     end
                 end
             end)
@@ -401,11 +400,11 @@ function TOOL:PrimaryAttack(ply)
     end
 
     if SERVER then
-        if table.HasValue(self.Selected, ent:MapCreationID()) then
+        if table.HasValue(self.selected, ent:MapCreationID()) then
             return
         end
 
-        table.insert(self.Selected, ent:MapCreationID())
+        table.insert(self.selected, ent:MapCreationID())
 
         net.Start("AddDoor")
         net.WriteInt(ent:MapCreationID(), 32)
@@ -424,7 +423,7 @@ function TOOL:SecondaryAttack(ply)
             return
         end
 
-        table.RemoveByValue(self.Selected, ent:MapCreationID())
+        table.RemoveByValue(self.selected, ent:MapCreationID())
 
         net.Start("RemoveDoor")
         net.WriteInt(ent:MapCreationID(), 32)
@@ -445,9 +444,9 @@ if CLIENT then
         if wep:GetClass() != "tool" then
             return
         end
-
-        local tool = TOOLS.list[player_manager.RunClass(LocalPlayer(), "GetCurrentTool")]
-        if tool.Name != TOOL.Name then
+        
+        local tool = tool.GetByIndex(player_manager.RunClass(LocalPlayer(), "GetCurrentTool"))
+        if tool.name != TOOL.name then
             return
         end
 
@@ -455,8 +454,8 @@ if CLIENT then
 
         local highlighted = {}
         for e = 1, #entities, 1 do
-            for s = 1, #TOOL.Selected, 1 do
-                if entities[e]:GetNWInt("MapCreationId") == TOOL.Selected[s] then
+            for s = 1, #TOOL.selected, 1 do
+                if entities[e]:GetNWInt("MapCreationId") == TOOL.selected[s] then
                     table.insert(highlighted, entities[e])
                 end
             end
@@ -466,11 +465,11 @@ if CLIENT then
     end)
 
     net.Receive("AddDoor", function (len, ply)
-        table.insert(TOOL.Selected, net.ReadInt(32))
+        table.insert(TOOL.selected, net.ReadInt(32))
     end)
 
     net.Receive("RemoveDoor", function (len, ply)
-        table.RemoveByValue(TOOL.Selected, net.ReadInt(32))
+        table.RemoveByValue(TOOL.selected, net.ReadInt(32))
     end)
 end
 
@@ -485,4 +484,4 @@ if SERVER then
     end)
 end
 
-TOOLS:Add(TOOL)
+tool.Add(TOOL)

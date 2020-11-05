@@ -47,47 +47,47 @@ SWEP.ScriptedEntityType = "weapon"
 SWEP.m_bPlayPickupSound = true
 
 function SWEP:Deploy(newOwner)
-    local tool = TOOLS.list[player_manager.RunClass(self.Owner, "GetCurrentTool")]
+    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
 
-    if tool.Deploy then
-        tool:Deploy(newOwner)
+    if current.Deploy then
+        current:Deploy(newOwner)
     end
 end
 
 function SWEP:Holster(weapon)
-    local tool = TOOLS.list[player_manager.RunClass(self.Owner, "GetCurrentTool")]
+    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
 
-    if tool.Holster != nil then
-        tool:Holster(weapon)
+    if current.Holster != nil then
+        current:Holster(weapon)
     end
 
     return true
 end
 
 function SWEP:OnDrop()
-    local tool = TOOLS.list[player_manager.RunClass(self.Owner, "GetCurrentTool")]
+    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
 
-    if tool.OnDrop != nil then
-        tool:OnDrop()
+    if current.OnDrop != nil then
+        current:OnDrop()
     end
 end
 
 function SWEP:Reload()
-    local tool = TOOLS.list[player_manager.RunClass(self.Owner, "GetCurrentTool")]
+    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
 
-    if tool.Reload != nil then
-        tool:Reload()
+    if current.Reload != nil then
+        current:Reload()
     end
 end
 
 function SWEP:PrimaryAttack()
-    local tool = TOOLS.list[player_manager.RunClass(self.Owner, "GetCurrentTool")]
+    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
 
-    if tool.PrimaryAttack != nil then
-        tool:PrimaryAttack(self.Owner)
+    if current.PrimaryAttack != nil then
+        current:PrimaryAttack(self.Owner)
     end
     
-    self:EmitSound(tool.Primary.Sound)
+    self:EmitSound(current.primary.sound)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self.Owner:SetAnimation(PLAYER_ATTACK1)
 
@@ -113,17 +113,17 @@ function SWEP:PrimaryAttack()
 	effectdata:SetEntity(self)
 	util.Effect("ToolTracer", effectdata)
 
-    self:SetNextPrimaryFire(CurTime() + tool.Primary.Delay)
+    self:SetNextPrimaryFire(CurTime() + current.primary.delay)
 end
 
 function SWEP:SecondaryAttack()
-    local tool = TOOLS.list[player_manager.RunClass(self.Owner, "GetCurrentTool")]
+    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
 
-    if tool.SecondaryAttack != nil then
-        tool:SecondaryAttack(self.Owner)
+    if current.SecondaryAttack != nil then
+        current:SecondaryAttack(self.Owner)
     end
 
-    self:EmitSound(tool.Secondary.Sound)
+    self:EmitSound(current.secondary.sound)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self.Owner:SetAnimation(PLAYER_ATTACK1)
 
@@ -149,5 +149,5 @@ function SWEP:SecondaryAttack()
 	effectdata:SetEntity(self)
 	util.Effect("ToolTracer", effectdata)
 
-    self:SetNextSecondaryFire(CurTime() + tool.Secondary.Delay)
+    self:SetNextSecondaryFire(CurTime() + current.secondary.delay)
 end
