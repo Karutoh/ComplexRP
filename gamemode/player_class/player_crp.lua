@@ -65,65 +65,60 @@ function PLAYER:GetCurrentTool()
 end
 
 function PLAYER:Save()
-    if CLIENT then
-        local output = util.TableToJSON({
-            currentTool = self.currentTool
-        })
+    local output = nil
+    local path = "complexrp/localplayer.txt"
 
-        file.CreateDir("complexrp")
-
-        if !file.Exists("complexrp/localplayer.txt", "DATA") then
-            file.Write("complexrp/localplayer.txt", "")
-        end
-    
-        local playerFile = file.Open("complexrp/localplayer.txt", "w", "DATA")
-        playerFile:Write(output)
-        playerFile:Flush()
-        playerFile:Close()
-    end
+    file.CreateDir("complexrp")
 
     if SERVER then
-        local output = util.TableToJSON({
+        output = util.TableToJSON({
             rank = self.rank
         })
 
-        file.CreateDir("complexrp")
         file.CreateDir("complexrp/players")
 
-        if !file.Exists("complexrp/players/" .. self.Player:SteamID64() .. ".txt", "DATA") then
-            file.Write("complexrp/players/" .. self.Player:SteamID64() .. ".txt", "")
-        end
-    
-        local plyFile = file.Open("complexrp/players/" .. self.Player:SteamID64() .. ".txt", "w", "DATA")
-        plyFile:Write(output)
-        plyFile:Flush()
-        plyFile:Close()
+        path = "complexrp/players/" .. self.Player:SteamID64() .. ".txt"
     end
+
+    if CLIENT then
+        output = util.TableToJSON({
+            currentTool = self.currentTool
+        })
+    end
+
+    if !file.Exists(path, "DATA") then
+        file.Write(path, "")
+    end
+
+    local playerFile = file.Open(path, "w", "DATA")
+    playerFile:Write(output)
+    playerFile:Flush()
+    playerFile:Close()
 end
 
 function PLAYER:Load()
-    if CLIENT then
-        local plyFile = file.Open("complexrp/localplayer.txt", "r", "DATA")
-        if plyFile == nil then
-            return
-        end
-
-        local plyData = util.JSONToTable(plyFile:Read(plyFile:Size()))
-        plyFile:Close()
-
-        self:SetCurrentTool(plyData.currentTool)
-    end
+    local path = "complexrp/localplayer.txt"
 
     if SERVER then
-        local plyFile = file.Open("complexrp/players/" .. self.Player:SteamID64() .. ".txt", "r", "DATA")
-        if plyFile == nil then
-            return
-        end
+        file.CreateDir("complexrp/players")
 
-        local plyData = util.JSONToTable(plyFile:Read(plyFile:Size()))
-        plyFile:Close()
+        path = "complexrp/players/" .. self.Player:SteamID64() .. ".txt"
+    end
 
+    local plyFile = file.Open("complexrp/localplayer.txt", "r", "DATA")
+    if plyFile == nil then
+        return
+    end
+
+    local plyData = util.JSONToTable(plyFile:Read(plyFile:Size()))
+    plyFile:Close()
+
+    if SERVER then
         self:SetRank(plyData.rank)
+    end
+
+    if CLIENT then
+        self:SetCurrentTool(plyData.currentTool)
     end
 end
 
