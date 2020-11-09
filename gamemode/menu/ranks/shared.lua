@@ -2,6 +2,14 @@ rank = {}
 
 local ranks = {}
 
+if SERVER then
+    rank.Initialize = function (ply)
+        net.Start("ClientLoadRanks")
+        net.WriteTable(ranks)
+        net.Send(ply)
+    end
+end
+
 rank.Create = function (name, template)
     local tmp = {
         name = name,
@@ -49,13 +57,36 @@ rank.SetPermissions = function (index, permissions)
         return false
     end
 
-    ranks[index].permissions = permissions
-
     if CLIENT then
+        local rankName = player_manager.RunClass(LocalPlayer(), "GetRank")
+        if rankName == nil then
+            return false
+        end
+
+        local rankT = rank.Get(rankName)
+        if rankT == nil then
+            return false
+        end
+
+        if !rankT.permissions.ranksVisible then
+            return false
+        end
+
         net.Start("UpdateRank")
         net.WriteString(ranks[index].name)
         net.WriteTable(permissions)
         net.SendToServer()
+    end
+
+    ranks[index].permissions = permissions
+
+    if SERVER then
+        net.Start("ClientUpdateRank")
+        net.WriteString(ranks[index].name)
+        net.WriteTable(permissions)
+        net.Broadcast()
+        
+        rank.Save()
     end
 
     return true
@@ -93,9 +124,31 @@ rank.Remove = function (name)
             table.remove(ranks, i)
 
             if CLIENT then
+                local rankName = player_manager.RunClass(LocalPlayer(), "GetRank")
+                if rankName == nil then
+                    return false
+                end
+        
+                local rankT = rank.Get(rankName)
+                if rankT == nil then
+                    return false
+                end
+
+                if !rankT.permissions.ranksVisible then
+                    return false
+                end
+
                 net.Start("RemoveRank")
                 net.WriteString(ranks[i].name)
                 net.SendToServer()
+            end
+
+            if SERVER then
+                net.Start("ClientRemoveRank")
+                net.WriteString(ranks[i].name)
+                net.Broadcast()
+
+                rank.Save()
             end
 
             return true
@@ -106,23 +159,72 @@ rank.Remove = function (name)
 end
 
 rank.Add = function (newRank)
-    PrintTable(newRank)
-    if self.Exists(newRank.name) then
+    if rank.Exists(newRank.name) then
         return false
+    end
+
+    if CLIENT then
+        local rankName = player_manager.RunClass(LocalPlayer(), "GetRank")
+        if rankName == nil then
+            return false
+        end
+
+        local rankT = rank.Get(rankName)
+        if rankT == nil then
+            return false
+        end
+
+        if !rankT.permissions.ranksVisible then
+            return false
+        end
+
+        net.Start("AddRank")
+        net.WriteTable(newRank)
+        net.SendToServer()
     end
 
     table.insert(ranks, newRank)
 
-    if CLIENT then
-        net.Start("AddRank")
+    if SERVER then
+        net.Start("ClientAddRank")
         net.WriteTable(newRank)
-        net.SendToServer()
+        net.Broadcast()
+
+        rank.Save()
     end
 
     return true
 end
 
 if SERVER then
+    rank.Save = function()
+        local output = util.TableToJSON(ranks)
+
+        file.CreateDir("complexrp")
+
+        if !file.Exists("complexrp/ranks.txt", "DATA") then
+            file.Write("complexrp/ranks.txt", "")
+        end
+
+        local ranksFile = file.Open("complexrp/ranks.txt", "w", "DATA")
+        ranksFile:Write(output)
+        ranksFile:Flush()
+        ranksFile:Close()
+    end
+
+    rank.Load = function()
+        file.CreateDir("complexrp")
+
+        if !file.Exists("complexrp/ranks.txt", "DATA") then
+            return
+        end
+
+        local ranksFile = file.Open("complexrp/ranks.txt", "r", "DATA")
+        ranks = util.JSONToTable(ranksFile:Read(ranksFile:Size()))
+        ranksFile:Close()
+    end
+
+    util.AddNetworkString("ClientLoadRanks")
     util.AddNetworkString("UpdateRank")
     util.AddNetworkString("ClientUpdateRank")
     util.AddNetworkString("RemoveRank")
@@ -154,6 +256,24 @@ if SERVER then
     net.Receive("AddRank", function (len, ply)
         local newRank = net.ReadTable()
 
+        local rankName = player_manager.RunClass(ply, "GetRank")
+        if rankName == nil then
+            net.Start("ClientRemoveRank")
+            net.SendString(newRank.name)
+            net.Send(ply)
+
+            return
+        end
+
+        local rankT = rank.Get(rankName)
+        if !rankT.permissions.ranksVisible then
+            net.Start("ClientRemoveRank")
+            net.SendString(newRank.name)
+            net.Send(ply)
+
+            return
+        end
+
         local accepted = rank.Add(newRank)
         if accepted == true then
             net.Start("ClientAddRank")
@@ -168,6 +288,10 @@ if SERVER then
 end
 
 if CLIENT then
+    net.Receive("ClientLoadRanks", function (len, ply)
+        ranks = net.ReadTable()
+    end)
+
     net.Receive("ClientUpdateRank", function (len, ply)
         local rankName = string.lower(net.ReadString())
         local permissions = net.ReadTable()

@@ -1,4 +1,62 @@
+local function TextEntryBox(frame, tmpText, task)
+    frame:SetMouseInputEnabled(false)
+    frame:SetKeyboardInputEnabled(false)
+
+    local group = vgui.Create("DFrame", frame)
+    group:SetSize(300, 80)
+    group:Show()
+    group:Center()
+    group:MakePopup()
+    group:SetBackgroundBlur(true)
+    group:SetFocusTopLevel(true)
+    group.OnClose = function ()
+        frame:SetMouseInputEnabled(true)
+        frame:SetKeyboardInputEnabled(true)
+    end
+
+    local text = vgui.Create("DTextEntry", group)
+    text:SetPlaceholderText(tmpText)
+    text:SetWidth(group:GetWide() - 10)
+    text:SetPos(group:GetWide() / 2 - text:GetWide() / 2, 30)
+
+    local submit = vgui.Create("DButton", group)
+    submit:SetText("Submit")
+    submit:SetWide(group:GetWide() / 4)
+    submit:SetPos(group:GetWide() / 4, group:GetTall() - submit:GetTall() - 5)
+    submit.DoClick = function(p)
+        task(text:GetText())
+
+        frame:SetMouseInputEnabled(true)
+        frame:SetKeyboardInputEnabled(true)
+        group:Close()
+    end
+
+    local cancel = vgui.Create("DButton", group)
+    cancel:SetText("Cancel")
+    cancel:SetWide(group:GetWide() / 4)
+    cancel:SetPos(group:GetWide() / 2, group:GetTall() - submit:GetTall() - 5)
+    cancel.DoClick = function(p)
+        frame:SetMouseInputEnabled(true)
+        frame:SetKeyboardInputEnabled(true)
+        group:Close()
+    end
+end
+
 function GM:AddMenuTabRanks(frame, tabs)
+    local rankName = player_manager.RunClass(LocalPlayer(), "GetRank")
+    if rankName == nil then
+        return
+    end
+
+    local rankT = rank.Get(rankName)
+    if rankT == nil then
+        return
+    end
+
+    if !rankT.permissions.ranksVisible then
+        return
+    end
+
     local ranks = vgui.Create("DPanel", tabs)
     ranks:SetSize(tabs:GetWide(), tabs:GetTall() - 36)
 
@@ -12,6 +70,14 @@ function GM:AddMenuTabRanks(frame, tabs)
     addRank:SetText("Add Rank")
     addRank:SetSize(ranks:GetWide() / 8, 40)
     addRank:SetPos(0, ranks:GetTall() - 40)
+    addRank.DoClick = function (p)
+        TextEntryBox(frame, "Rank Name", function (text)
+            local newRank = rank.Create(text)
+            if newRank then
+                rank.Add(newRank)
+            end
+        end)
+    end
 
     local tabVisibility = vgui.Create("DPanel", ranks)
     tabVisibility:SetWide(ranks:GetWide() / 8)
