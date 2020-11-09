@@ -445,7 +445,16 @@ if CLIENT then
             return
         end
         
-        local t = tool.GetByIndex(player_manager.RunClass(LocalPlayer(), "GetCurrentTool"))
+        local i = player_manager.RunClass(LocalPlayer(), "GetCurrentTool")
+        if i < 1 then
+            return
+        end
+
+        local t = tool.GetByIndex(i)
+        if t == nil then
+            return
+        end
+
         if t.name != TOOL.name then
             return
         end
