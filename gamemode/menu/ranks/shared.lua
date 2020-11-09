@@ -213,13 +213,11 @@ if SERVER then
     end
 
     rank.Load = function()
-        file.CreateDir("complexrp")
-
-        if !file.Exists("complexrp/ranks.txt", "DATA") then
+        local ranksFile = file.Open("complexrp/ranks.txt", "r", "DATA")
+        if ranksFile == nil then
             return
         end
 
-        local ranksFile = file.Open("complexrp/ranks.txt", "r", "DATA")
         ranks = util.JSONToTable(ranksFile:Read(ranksFile:Size()))
         ranksFile:Close()
     end

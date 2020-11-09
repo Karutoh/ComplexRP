@@ -45,9 +45,18 @@ SWEP.AccurateCrosshair = false
 SWEP.DisableDuplicator = true
 SWEP.ScriptedEntityType = "weapon"
 SWEP.m_bPlayPickupSound = true
+SWEP.LastOwner = nil
 
 function SWEP:Deploy(newOwner)
-    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
+    local i = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    if i < 1 then
+        return true
+    end
+
+    local current = tool.GetByIndex(i)
+    if current == nil then
+        return true
+    end
 
     if current.Deploy then
         current:Deploy(newOwner)
@@ -55,7 +64,15 @@ function SWEP:Deploy(newOwner)
 end
 
 function SWEP:Holster(weapon)
-    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
+    local i = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    if i < 1 then
+        return true
+    end
+
+    local current = tool.GetByIndex(i)
+    if current == nil then
+        return true
+    end
 
     if current.Holster != nil then
         current:Holster(weapon)
@@ -65,7 +82,19 @@ function SWEP:Holster(weapon)
 end
 
 function SWEP:OnDrop()
-    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
+    if self.LastOwner == nil then
+        return
+    end
+
+    local i = player_manager.RunClass(self.LastOwner, "GetCurrentTool")
+    if i < 1 then
+        return
+    end
+
+    local current = tool.GetByIndex(i)
+    if current == nil then
+        return
+    end
 
     if current.OnDrop != nil then
         current:OnDrop()
@@ -73,7 +102,15 @@ function SWEP:OnDrop()
 end
 
 function SWEP:Reload()
-    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
+    local i = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    if i < 1 then
+        return
+    end
+
+    local current = tool.GetByIndex(i)
+    if current == nil then
+        return
+    end
 
     if current.Reload != nil then
         current:Reload()
@@ -81,7 +118,15 @@ function SWEP:Reload()
 end
 
 function SWEP:PrimaryAttack()
-    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
+    local i = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    if i < 1 then
+        return
+    end
+
+    local current = tool.GetByIndex(i)
+    if current == nil then
+        return
+    end
 
     if current.PrimaryAttack != nil then
         current:PrimaryAttack(self.Owner)
@@ -116,8 +161,22 @@ function SWEP:PrimaryAttack()
     self:SetNextPrimaryFire(CurTime() + current.primary.delay)
 end
 
+function SWEP:Equip(newOwner)
+    if newOwner:IsPlayer() then
+        self.LastOwner = newOwner
+    end
+end
+
 function SWEP:SecondaryAttack()
-    local current = tool.GetByIndex(player_manager.RunClass(self.Owner, "GetCurrentTool"))
+    local i = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    if i < 1 then
+        return true
+    end
+
+    local current = tool.GetByIndex(i)
+    if current == nil then
+        return true
+    end
 
     if current.SecondaryAttack != nil then
         current:SecondaryAttack(self.Owner)

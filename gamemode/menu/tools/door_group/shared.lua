@@ -445,8 +445,8 @@ if CLIENT then
             return
         end
         
-        local tool = tool.GetByIndex(player_manager.RunClass(LocalPlayer(), "GetCurrentTool"))
-        if tool.name != TOOL.name then
+        local t = tool.GetByIndex(player_manager.RunClass(LocalPlayer(), "GetCurrentTool"))
+        if t.name != TOOL.name then
             return
         end
 

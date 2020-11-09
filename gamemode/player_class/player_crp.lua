@@ -47,7 +47,9 @@ function PLAYER:SetCurrentTool(index)
         net.Start("ClientSetCurrentTool")
         net.WriteInt(index, 32)
         net.Send(self.Player)
-    else
+    end
+
+    if CLIENT then
         net.Start("SetCurrentTool")
         net.WriteInt(index, 32)
         net.SendToServer()
@@ -56,6 +58,69 @@ end
 
 function PLAYER:GetCurrentTool()
     return self.currentTool
+end
+
+function PLAYER:Save()
+    if CLIENT then
+        local output = util.TableToJSON({
+            currentTool = self.currentTool
+        })
+
+        file.CreateDir("complexrp")
+
+        if !file.Exists("complexrp/localplayer.txt", "DATA") then
+            file.Write("complexrp/localplayer.txt", "")
+        end
+    
+        local playerFile = file.Open("complexrp/localplayer.txt", "w", "DATA")
+        playerFile:Write(output)
+        playerFile:Flush()
+        playerFile:Close()
+    end
+
+    if SERVER then
+        local output = util.TableToJSON({
+            rank = self.rank
+        })
+
+        file.CreateDir("complexrp")
+        file.CreateDir("complexrp/players")
+
+        if !file.Exists("complexrp/players/" .. self.Player:SteamID64() .. ".txt", "DATA") then
+            file.Write("complexrp/players/" .. self.Player:SteamID64() .. ".txt", "")
+        end
+    
+        local plyFile = file.Open("complexrp/players/" .. self.Player:SteamID64() .. ".txt", "w", "DATA")
+        plyFile:Write(output)
+        plyFile:Flush()
+        plyFile:Close()
+    end
+end
+
+function PLAYER:Load()
+    if CLIENT then
+        local plyFile = file.Open("complexrp/localplayer.txt", "r", "DATA")
+        if plyFile == nil then
+            return
+        end
+
+        local plyData = util.JSONToTable(plyFile:Read(plyFile:Size()))
+        plyFile:Close()
+
+        self:SetCurrentTool(plyData.currentTool)
+    end
+
+    if SERVER then
+        local plyFile = file.Open("complexrp/players/" .. self.Player:SteamID64() .. ".txt", "r", "DATA")
+        if plyFile == nil then
+            return
+        end
+
+        local plyData = util.JSONToTable(plyFile:Read(plyFile:Size()))
+        plyFile:Close()
+
+        self:SetRank(plyData.rank)
+    end
 end
 
 player_manager.RegisterClass("player_crp", PLAYER, "player_default")
