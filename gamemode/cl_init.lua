@@ -4,6 +4,10 @@ include("player_class/player_crp.lua")
 --Root
 include("shared.lua")
 
+--Weapon Selection
+include("weaponsel/cl_init.lua")
+include("weaponsel/shared.lua")
+
 --Menu
 include("menu/client.lua")
 

@@ -10,6 +10,12 @@ AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("shared.lua")
 include("shared.lua")
 
+-- Weapon Selection
+AddCSLuaFile("weaponsel/cl_init.lua")
+AddCSLuaFile("weaponsel/shared.lua")
+include("weaponsel/init.lua")
+include("weaponsel/shared.lua")
+
 --Menu
 AddCSLuaFile("menu/client.lua")
 include("menu/server.lua")
