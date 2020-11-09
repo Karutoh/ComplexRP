@@ -39,6 +39,7 @@ end
 
 function GM:PlayerFullLoad(ply)
     rank.Initialize(ply)
+    player_manager.RunClass(ply, "Load")
 end
 
 function GM:PlayerInitialSpawn(ply, transition)

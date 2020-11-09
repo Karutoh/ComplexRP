@@ -19,6 +19,8 @@ if SERVER then
         net.Send(self.Player)
         
         self.rank = name
+
+        self:Save()
     end
 
     net.Receive("SetCurrentTool", function (len, ply)
@@ -53,6 +55,8 @@ function PLAYER:SetCurrentTool(index)
         net.Start("SetCurrentTool")
         net.WriteInt(index, 32)
         net.SendToServer()
+
+        self:Save()
     end
 end
 

@@ -18,6 +18,10 @@ hook.Add("PlayerClassChanged", "ClientLoadedPlayerClass", function (ply, newId)
     net.SendToServer()
 end)
 
+function GM:InitPostEntity()
+    player_manager.RunClass(LocalPlayer(), "Load")
+end
+
 function GM:PostDrawViewModel(vm, ply, weapon)
 	if weapon.UseHands || !weapon:IsScripted() then
 		local hands = LocalPlayer():GetHands()
