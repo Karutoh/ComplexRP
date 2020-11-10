@@ -19,8 +19,10 @@ tool.Create = function (name)
 end
 
 tool.Exists = function (name)
+    local lName = string.lower(name)
+    
     for i = 1, #tools, 1 do
-        if string.lower(tools[i].name) == string.lower(name) then
+        if string.lower(tools[i].name) == lName then
             return true
         end
     end
@@ -41,8 +43,10 @@ tool.GetByIndex = function (index)
 end
 
 tool.Get = function (name)
+    local lName = string.lower(name)
+
     for i = 1, #tools, 1 do
-        if string.lower(tools[i].name) == string.lower(tool.name) then
+        if string.lower(tools[i].name) == lName then
             return table.Copy(tools[i]), i
         end
     end

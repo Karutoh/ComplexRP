@@ -48,12 +48,7 @@ SWEP.m_bPlayPickupSound = true
 SWEP.LastOwner = nil
 
 function SWEP:Deploy(newOwner)
-    local i = player_manager.RunClass(self.Owner, "GetCurrentTool")
-    if i < 1 then
-        return true
-    end
-
-    local current = tool.GetByIndex(i)
+    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
     if current == nil then
         return true
     end
@@ -64,12 +59,7 @@ function SWEP:Deploy(newOwner)
 end
 
 function SWEP:Holster(weapon)
-    local i = player_manager.RunClass(self.Owner, "GetCurrentTool")
-    if i < 1 then
-        return true
-    end
-
-    local current = tool.GetByIndex(i)
+    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
     if current == nil then
         return true
     end
@@ -86,12 +76,7 @@ function SWEP:OnDrop()
         return
     end
 
-    local i = player_manager.RunClass(self.LastOwner, "GetCurrentTool")
-    if i < 1 then
-        return
-    end
-
-    local current = tool.GetByIndex(i)
+    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
     if current == nil then
         return
     end
@@ -102,12 +87,7 @@ function SWEP:OnDrop()
 end
 
 function SWEP:Reload()
-    local i = player_manager.RunClass(self.Owner, "GetCurrentTool")
-    if i < 1 then
-        return
-    end
-
-    local current = tool.GetByIndex(i)
+    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
     if current == nil then
         return
     end
@@ -117,13 +97,14 @@ function SWEP:Reload()
     end
 end
 
-function SWEP:PrimaryAttack()
-    local i = player_manager.RunClass(self.Owner, "GetCurrentTool")
-    if i < 1 then
-        return
+function SWEP:Equip(newOwner)
+    if newOwner:IsPlayer() then
+        self.LastOwner = newOwner
     end
+end
 
-    local current = tool.GetByIndex(i)
+function SWEP:PrimaryAttack()
+    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
     if current == nil then
         return
     end
@@ -161,21 +142,10 @@ function SWEP:PrimaryAttack()
     self:SetNextPrimaryFire(CurTime() + current.primary.delay)
 end
 
-function SWEP:Equip(newOwner)
-    if newOwner:IsPlayer() then
-        self.LastOwner = newOwner
-    end
-end
-
 function SWEP:SecondaryAttack()
-    local i = player_manager.RunClass(self.Owner, "GetCurrentTool")
-    if i < 1 then
-        return true
-    end
-
-    local current = tool.GetByIndex(i)
+    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
     if current == nil then
-        return true
+        return
     end
 
     if current.SecondaryAttack != nil then

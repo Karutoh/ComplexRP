@@ -1,62 +1,106 @@
 DEFINE_BASECLASS("player_default")
 
 local PLAYER = {}
-PLAYER.rank = ""
-PLAYER.currentTool = 0
+PLAYER.rank = nil
+PLAYER.currentTool = nil
 
 if SERVER then
-    util.AddNetworkString("ClientSetRank")
+    util.AddNetworkString("SetRank")
+    util.AddNetworkString("RequestRank")
     util.AddNetworkString("SetCurrentTool")
-    util.AddNetworkString("ClientSetCurrentTool")
+    util.AddNetworkString("RequestCurrentTool")
 
-    function PLAYER:SetRank(name)
-        if !rank.Exists(name) then
+    net.Receive("RequestRank", function (len, ply)
+        local tar = player.GetBySteamID64(net.ReadString())
+        if tar == nil then
             return
         end
-    
-        net.Start("ClientSetRank")
-        net.WriteString(name)
-        net.Send(self.Player)
-        
-        self.rank = name
 
-        self:Save()
-    end
+        local reqRank = rank.Get(player_manager.RunClass(ply, "GetRank"))
+        if reqRank == nil then
+            return
+        end
 
-    net.Receive("SetCurrentTool", function (len, ply)
-        PLAYER.currentTool = net.ReadInt(32)
+        if !reqRank.permissions.canEditPlayerRank then
+            return
+        end
+
+        player_manager.RunClass(tar, "SetRank", net.ReadString())
+    end)
+
+    net.Receive("RequestCurrentTool", function (len, ply)
+        local tar = player.GetBySteamID64(net.ReadString())
+        if tar == nil then
+            return
+        end
+
+        player_manager.RunClass(tar, "SetCurrentTool", net.ReadString())
     end)
 end
 
 if CLIENT then
-    net.Receive("ClientSetCurrentTool", function (len, ply)
-        PLAYER.currentTool = net.ReadInt(32)
-    end)
-
-    net.Receive("ClientSetRank", function (len, ply)
+    net.Receive("SetRank", function (len, ply)
         PLAYER.rank = net.ReadString()
     end)
+
+    net.Receive("SetCurrentTool", function (len, ply)
+        local t = tool.Get(net.ReadString())
+        if t == nil then
+            return
+        end
+
+        PLAYER.currentTool = t
+    end)
+end
+
+function PLAYER:SetRank(name)
+    if SERVER then
+        if !rank.Exists(name) then
+            return
+        end
+
+        self.rank = name
+
+        net.Start("SetRank")
+        net.WriteString(name)
+        net.Send(self.Player)
+
+        self:Save()
+    end
+
+    if CLIENT then
+        net.Start("RequestRank")
+        net.WriteString(self.Player:SteamID64())
+        net.WriteString(name)
+        net.SendToServer()
+    end
 end
 
 function PLAYER:GetRank()
     return self.rank
 end
 
-function PLAYER:SetCurrentTool(index)
-    self.currentTool = index
-
+function PLAYER:SetCurrentTool(name)
     if SERVER then
-        net.Start("ClientSetCurrentTool")
-        net.WriteInt(index, 32)
+        local t = tool.Get(name)
+        if t == nil then
+            return
+        end
+
+        self.currentTool = t
+
+        net.Start("SetCurrentTool")
+        net.WriteString(name)
         net.Send(self.Player)
+
+        --self:Save()
     end
 
     if CLIENT then
-        net.Start("SetCurrentTool")
-        net.WriteInt(index, 32)
+        net.Start("RequestCurrentTool")
+        net.WriteString(self.Player:SteamID64())
+        net.WriteString(name)
         net.SendToServer()
-
-        self:Save()
     end
 end
 
@@ -84,6 +128,8 @@ function PLAYER:Save()
         output = util.TableToJSON({
             currentTool = self.currentTool
         })
+
+        return
     end
 
     if !file.Exists(path, "DATA") then
@@ -103,6 +149,10 @@ function PLAYER:Load()
         file.CreateDir("complexrp/players")
 
         path = "complexrp/players/" .. self.Player:SteamID64() .. ".txt"
+    end
+
+    if CLIENT then
+        return
     end
 
     local plyFile = file.Open("complexrp/localplayer.txt", "r", "DATA")

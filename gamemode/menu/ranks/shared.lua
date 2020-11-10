@@ -17,6 +17,9 @@ rank.Create = function (name, template)
             toolsVisible = true,
             propsVisible = true,
             ranksVisible = false,
+            canEditPlayerRank = false,
+            canEditRanks = false,
+            canNoClip = false,
             canVoteKick = false,
             canKick = false,
             canBan = false,
@@ -30,8 +33,10 @@ rank.Create = function (name, template)
         return tmp
     end
 
+    local templateL = string.lower(template)
+
     for i = 1, #ranks, 1 do
-        if string.lower(ranks[i].name) == string.lower(template) then
+        if string.lower(ranks[i].name) == templateL then
             tmp = table.Copy(ranks[i])
             break
         end
@@ -68,7 +73,7 @@ rank.SetPermissions = function (index, permissions)
             return false
         end
 
-        if !rankT.permissions.ranksVisible then
+        if !rankT.permissions.canEditRanks then
             return false
         end
 
@@ -134,7 +139,7 @@ rank.Remove = function (name)
                     return false
                 end
 
-                if !rankT.permissions.ranksVisible then
+                if !rankT.permissions.canEditRanks then
                     return false
                 end
 
@@ -174,7 +179,7 @@ rank.Add = function (newRank)
             return false
         end
 
-        if !rankT.permissions.ranksVisible then
+        if !rankT.permissions.canEditRanks then
             return false
         end
 
