@@ -76,7 +76,7 @@ function SWEP:OnDrop()
         return
     end
 
-    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    local current = player_manager.RunClass(self.LastOwner, "GetCurrentTool")
     if current == nil then
         return
     end
