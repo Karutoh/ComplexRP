@@ -1,4 +1,7 @@
 SWEP.Category = "Other"
+
+SWEP.Base = 'crp_base'
+
 SWEP.Spawnable = false
 SWEP.AdminOnly = false
 SWEP.PrintName = "Tool"
@@ -104,6 +107,7 @@ function SWEP:Equip(newOwner)
 end
 
 function SWEP:PrimaryAttack()
+    print(self:GetWeaponType())
     local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
     if current == nil then
         return
