@@ -81,6 +81,10 @@ function PLAYER:GetRank()
 end
 
 function PLAYER:SetCurrentTool(name)
+    if name == self.currentTool.name then
+        return
+    end
+
     if SERVER then
         local t = tool.Get(name)
         if t == nil then
