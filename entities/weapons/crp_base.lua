@@ -75,6 +75,3 @@ end
 function SWEP:SecondaryAttack()
 end
 ]]--
-function SWEP:GetWeaponType()
-    return self.WeaponType
-end

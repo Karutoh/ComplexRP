@@ -383,7 +383,7 @@ end
 function TOOL:Holster(weapon)
 end
 
-function TOOL:OnDrop()
+function TOOL:OnDrop(lastOwner)
 end
 
 function TOOL:Reload()
@@ -392,16 +392,16 @@ end
 function TOOL:PrimaryAttack(ply)
     local ent = ply:GetEyeTrace().Entity
     if !IsValid(ent) then
-        return
+        return false
     end
 
     if ent:GetClass() != "prop_door_rotating" then
-        return
+        return false
     end
 
     if SERVER then
         if table.HasValue(self.selected, ent:MapCreationID()) then
-            return
+            return false
         end
 
         table.insert(self.selected, ent:MapCreationID())
@@ -410,38 +410,40 @@ function TOOL:PrimaryAttack(ply)
         net.WriteInt(ent:MapCreationID(), 32)
         net.Send(ply)
     end
+
+    return true
 end
 
 function TOOL:SecondaryAttack(ply)
+    local ent = ply:GetEyeTrace().Entity
+    if !IsValid(ent) then
+        return false
+    end
+
+    if ent:GetClass() != "prop_door_rotating" then
+        return false
+    end
+
     if SERVER then
-        local ent = ply:GetEyeTrace().Entity
-        if !IsValid(ent) then
-            return
-        end
-
-        if ent:GetClass() != "prop_door_rotating" then
-            return
-        end
-
         table.RemoveByValue(self.selected, ent:MapCreationID())
 
         net.Start("RemoveDoor")
         net.WriteInt(ent:MapCreationID(), 32)
         net.Send(ply)
     end
+
+    return true
 end
 
 --Hooks
 if CLIENT then
-
-
     hook.Add("PreDrawHalos", "DoorGroupHalos", function ()
         local wep = LocalPlayer():GetActiveWeapon()
         if !IsValid(wep) then
             return
         end
 
-        if wep:GetClass() != "tool" then
+        if wep:GetClass() != "crp_tool" then
             return
         end
         
@@ -458,8 +460,8 @@ if CLIENT then
 
         local highlighted = {}
         for e = 1, #entities, 1 do
-            for s = 1, #TOOL.selected, 1 do
-                if entities[e]:GetNWInt("MapCreationId") == TOOL.selected[s] then
+            for s = 1, #t.selected, 1 do
+                if entities[e]:GetNWInt("MapCreationId") == t.selected[s] then
                     table.insert(highlighted, entities[e])
                 end
             end
@@ -469,11 +471,28 @@ if CLIENT then
     end)
 
     net.Receive("AddDoor", function (len, ply)
-        table.insert(TOOL.selected, net.ReadInt(32))
+        local t = player_manager.RunClass(LocalPlayer(), "GetCurrentTool")
+        if t == nil then
+            return
+        end
+
+        if t.name != TOOL.name then
+            return
+        end
+        table.insert(t.selected, net.ReadInt(32))
     end)
 
     net.Receive("RemoveDoor", function (len, ply)
-        table.RemoveByValue(TOOL.selected, net.ReadInt(32))
+        local t = player_manager.RunClass(LocalPlayer(), "GetCurrentTool")
+        if t == nil then
+            return
+        end
+
+        if t.name != TOOL.name then
+            return
+        end
+
+        table.RemoveByValue(t.selected, net.ReadInt(32))
     end)
 end
 

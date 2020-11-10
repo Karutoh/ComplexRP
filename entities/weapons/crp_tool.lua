@@ -1,7 +1,7 @@
 SWEP.Category = "Other"
 
 SWEP.Base = 'crp_base'
-
+SWEP.WeaponType = WT_MISC
 SWEP.Spawnable = false
 SWEP.AdminOnly = false
 SWEP.PrintName = "Tool"
@@ -51,7 +51,7 @@ SWEP.m_bPlayPickupSound = true
 SWEP.LastOwner = nil
 
 function SWEP:Deploy(newOwner)
-    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    local current = player_manager.RunClass(self:GetOwner(), "GetCurrentTool")
     if current == nil then
         return true
     end
@@ -62,7 +62,7 @@ function SWEP:Deploy(newOwner)
 end
 
 function SWEP:Holster(weapon)
-    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    local current = player_manager.RunClass(self:GetOwner(), "GetCurrentTool")
     if current == nil then
         return true
     end
@@ -85,18 +85,18 @@ function SWEP:OnDrop()
     end
 
     if current.OnDrop != nil then
-        current:OnDrop()
+        current:OnDrop(self.LastOwner)
     end
 end
 
 function SWEP:Reload()
-    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    local current = player_manager.RunClass(self:GetOwner(), "GetCurrentTool")
     if current == nil then
         return
     end
 
     if current.Reload != nil then
-        current:Reload()
+        current:Reload(self:GetOwner())
     end
 end
 
@@ -107,21 +107,22 @@ function SWEP:Equip(newOwner)
 end
 
 function SWEP:PrimaryAttack()
-    print(self:GetWeaponType())
-    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    local current = player_manager.RunClass(self:GetOwner(), "GetCurrentTool")
     if current == nil then
         return
     end
 
     if current.PrimaryAttack != nil then
-        current:PrimaryAttack(self.Owner)
+        if !current:PrimaryAttack(self:GetOwner()) then
+            return
+        end
     end
     
     self:EmitSound(current.primary.sound)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-    self.Owner:SetAnimation(PLAYER_ATTACK1)
+    self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 
-	local tr = util.GetPlayerTrace(self.Owner)
+	local tr = util.GetPlayerTrace(self:GetOwner())
 	tr.mask = bit.bor(CONTENTS_SOLID, CONTENTS_MOVEABLE, CONTENTS_MONSTER, CONTENTS_WINDOW, CONTENTS_DEBRIS, CONTENTS_GRATE, CONTENTS_AUX)
     local trace = util.TraceLine(tr)
 
@@ -138,7 +139,7 @@ function SWEP:PrimaryAttack()
 
 	local effectdata = EffectData()
 	effectdata:SetOrigin(trace.HitPos)
-	effectdata:SetStart(self.Owner:GetShootPos())
+	effectdata:SetStart(self:GetOwner():GetShootPos())
 	effectdata:SetAttachment(1)
 	effectdata:SetEntity(self)
 	util.Effect("ToolTracer", effectdata)
@@ -147,20 +148,22 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
-    local current = player_manager.RunClass(self.Owner, "GetCurrentTool")
+    local current = player_manager.RunClass(self:GetOwner(), "GetCurrentTool")
     if current == nil then
         return
     end
 
     if current.SecondaryAttack != nil then
-        current:SecondaryAttack(self.Owner)
+        if !current:SecondaryAttack(self:GetOwner()) then
+            return
+        end
     end
 
     self:EmitSound(current.secondary.sound)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-    self.Owner:SetAnimation(PLAYER_ATTACK1)
+    self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 
-	local tr = util.GetPlayerTrace(self.Owner)
+	local tr = util.GetPlayerTrace(self:GetOwner())
 	tr.mask = bit.bor(CONTENTS_SOLID, CONTENTS_MOVEABLE, CONTENTS_MONSTER, CONTENTS_WINDOW, CONTENTS_DEBRIS, CONTENTS_GRATE, CONTENTS_AUX)
     local trace = util.TraceLine(tr)
 
@@ -177,7 +180,7 @@ function SWEP:SecondaryAttack()
 
 	local effectdata = EffectData()
 	effectdata:SetOrigin(trace.HitPos)
-	effectdata:SetStart(self.Owner:GetShootPos())
+	effectdata:SetStart(self:GetOwner():GetShootPos())
 	effectdata:SetAttachment(1)
 	effectdata:SetEntity(self)
 	util.Effect("ToolTracer", effectdata)
