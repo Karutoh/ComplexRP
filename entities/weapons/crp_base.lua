@@ -1,3 +1,8 @@
+WT_PRIMARY = 1
+WT_SECONDARY = 2
+WT_EQUIPMENT = 3
+WT_MISC = 4
+
 SWEP.Category = "Other"
 SWEP.WeaponType = WT_PRIMARY
 SWEP.Spawnable = false
