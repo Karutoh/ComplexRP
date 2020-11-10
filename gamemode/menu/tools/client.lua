@@ -46,7 +46,7 @@ function GM:AddMenuTabTools(frame, tabs)
 
             net.Start("GiveTool")
             net.SendToServer()
-            input.SelectWeapon(LocalPlayer():GetWeapon("tool"))
+            --input.SelectWeapon(LocalPlayer():GetWeapon("tool"))
 
             local properties = p:GetParent():GetParent():GetParent():GetParent():GetChildren()[2]
             properties:Clear()
