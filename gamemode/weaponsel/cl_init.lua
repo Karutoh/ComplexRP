@@ -17,7 +17,6 @@ local dropDelay = 1
 local curTime = CurTime()
 
 hook.Add("Think","key Presses",function()
-
 	if not IsValid(vgui.GetKeyboardFocus()) and not gui.IsConsoleVisible() then
 		
 		if getKeyDown('G') and dropHotKeyPressed == false and LocalPlayer():IsValid() and LocalPlayer():GetActiveWeapon():IsValid() then
@@ -88,3 +87,4 @@ function scrollToWeapon(bindPressed)
 		setWeapon(index+1)
 	end
 end
+
